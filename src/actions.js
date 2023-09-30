@@ -68,3 +68,39 @@ export async function deleteTodo(id) {
     console.log(err);
   }
 }
+
+export async function registerUser({ name, email, password }) {
+  try {
+    const body = JSON.stringify({ name, email, password });
+    const { data } = await axios({
+      method: "POST",
+      url: `${API_URL}/users/register`,
+      data: body,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return data;
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export async function loginUser({ email, password }) {
+  try {
+    const body = JSON.stringify({ email, password });
+    const { data } = await axios({
+      method: "POST",
+      url: `${API_URL}/users/login`,
+      data: body,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return data;
+  } catch (err) {
+    console.log(err);
+  }
+}
