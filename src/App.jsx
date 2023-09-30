@@ -1,8 +1,17 @@
 import { useState, useEffect } from "react";
-import { Box, Button, Grid, GridItem, useToast } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Grid,
+  GridItem,
+  useToast,
+  Spinner,
+} from "@chakra-ui/react";
 import { createTodo, deleteTodo, editTodo, fetchTodos } from "./actions";
 import ModalContainer from "./Components/ModalContainer";
 import Todo from "./Components/TodosContainer";
+import useSWR from "swr";
+import { fetcher } from "./utils";
 
 function App() {
   const [todoForm, setTodoForm] = useState({
@@ -13,17 +22,19 @@ function App() {
     isNew: true,
   });
 
-  const [todos, setTodos] = useState([]);
-  const [isFetching, setIsFetching] = useState(false);
+  // here we are going to implement a data fetching hook called SWR
+  const { data: todos, error, isLoading, mutate } = useSWR("todos", fetcher);
 
-  useEffect(() => {
-    async function fetchData() {
-      const todos = await fetchTodos();
-      setTodos(todos);
-    }
-    fetchData();
-    console.log("ran");
-  }, [isFetching]);
+  // const [todos, setTodos] = useState([]);
+
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     const todos = await fetchTodos();
+  //     setTodos(todos);
+  //   }
+  //   fetchData();
+  //   console.log("ran");
+  // }, []);
 
   // console.log(todos);
 
@@ -51,12 +62,10 @@ function App() {
 
     if (isNew) {
       res = await createTodo({ task, description });
-      setIsFetching(true);
     } else {
       // edit todo
       console.log(todoForm);
       res = await editTodo({ task, description, isCompleted, id });
-      setIsFetching(true);
     }
 
     if (res) {
@@ -69,23 +78,19 @@ function App() {
       });
     }
 
+    mutate();
+
     setTodoForm({
       task: "",
       description: "",
       isNew: true,
     });
-    setIsFetching(false);
     setIsModalOpen(false);
   };
 
   const onDelete = async (e, id) => {
     deleteTodo(id);
-
-    setIsFetching(true);
-
-    setTimeout(() => {
-      setIsFetching(false);
-    }, 300);
+    mutate();
   };
 
   const onEdit = (e, id) => {
@@ -103,6 +108,30 @@ function App() {
 
     setIsModalOpen(true);
   };
+
+  if (isLoading) {
+    return (
+      <Box
+        height={"100vh"}
+        width={"100vw"}
+        display={"flex"}
+        justifyContent={"center"}
+        alignItems={"center"}
+      >
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="green.500"
+          size="xl"
+        />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return "error";
+  }
 
   return (
     <>
