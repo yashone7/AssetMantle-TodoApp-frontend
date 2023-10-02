@@ -1,7 +1,19 @@
 import { Box, Heading, Button } from "@chakra-ui/react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+
+    if (user) {
+      navigate("/app");
+    }
+  }, [navigate]);
+
   return (
     <Box
       w={"100vw"}

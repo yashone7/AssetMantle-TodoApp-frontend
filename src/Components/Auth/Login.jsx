@@ -11,14 +11,25 @@ import {
   Text,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { loginUser } from "../../actions";
 import { useAuthStore } from "../../store/useAuthStore";
 import jwtDecode from "jwt-decode";
+import { useNavigate } from "react-router-dom";
+import isEmpty from "lodash/isEmpty";
 
 function Login() {
-  const { user, setUser } = useAuthStore();
+  const { user, setUser, getUser } = useAuthStore();
+  const navigate = useNavigate();
+
+  console.log(getUser());
+
+  useEffect(() => {
+    if (!isEmpty(user)) {
+      navigate("/app");
+    }
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -33,11 +44,12 @@ function Login() {
     if (res) {
       const decodedToken = jwtDecode(res.token);
       console.log(decodedToken);
-      setUser(decodedToken);
+      setUser({ ...decodedToken, token: res.token });
     }
-  };
 
-  console.log(user);
+    // redirect to app
+    navigate("/app");
+  };
 
   const emailInput = useRef(null);
   const passwordInput = useRef(null);
