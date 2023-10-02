@@ -12,6 +12,9 @@ import ModalContainer from "./Components/ModalContainer";
 import Todo from "./Components/TodosContainer";
 import useSWR from "swr";
 import { fetcher } from "./utils";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "./store/useAuthStore";
+import { useBearStore } from "./store/useBearStore";
 
 function App() {
   const [todoForm, setTodoForm] = useState({
@@ -22,8 +25,20 @@ function App() {
     isNew: true,
   });
 
+  const navigate = useNavigate();
+  const { setUser, user, getUser } = useAuthStore();
+
+  // console.log(user);
+
+  // console.log(getUser());
+
   // here we are going to implement a data fetching hook called SWR
-  const { data: todos, error, isLoading, mutate } = useSWR("todos", fetcher);
+  const {
+    data: todos,
+    error,
+    isLoading,
+    mutate,
+  } = useSWR(["todos", user.token], fetcher);
 
   // const [todos, setTodos] = useState([]);
 
@@ -109,6 +124,12 @@ function App() {
     setIsModalOpen(true);
   };
 
+  const handleLogout = () => {
+    // localStorage.removeItem("user");
+    setUser({});
+    navigate("/", { replace: true });
+  };
+
   if (isLoading) {
     return (
       <Box
@@ -167,6 +188,9 @@ function App() {
           isCompleted={isCompleted}
           handleClose={() => setIsModalOpen(false)}
         />
+      </Box>
+      <Box>
+        <Button onClick={handleLogout}>logout</Button>
       </Box>
     </>
   );
